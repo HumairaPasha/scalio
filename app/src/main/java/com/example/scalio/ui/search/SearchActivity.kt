@@ -53,6 +53,7 @@ class SearchActivity : AppCompatActivity() {
                 if (it.refresh is LoadState.NotLoading) {
                     setViewVisibility()
                 }
+                binding.progressBar.isVisible = it.source.refresh is LoadState.Loading
                 setErrorHandling(it)
             }
         }

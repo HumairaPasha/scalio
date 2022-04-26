@@ -1,0 +1,127 @@
+plugins {
+    id 'com.android.application'
+    id 'kotlin-android'
+    id 'kotlin-kapt'
+    id 'dagger.hilt.android.plugin'
+    id 'jacoco'
+
+}
+
+android {
+    compileSdk 32
+
+    defaultConfig {
+        applicationId "com.example.scalio"
+        minSdk 21
+        targetSdk 32
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildTypes {
+        debug {
+            buildConfigField "String", "BASE_URL", "\"https://api.github.com\""
+            debuggable true
+            minifyEnabled false
+            testCoverageEnabled true
+        }
+        release {
+            buildConfigField "String", "BASE_URL", "\"https://api.github.com\""
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            minifyEnabled false
+            testCoverageEnabled true
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
+    buildFeatures {
+        viewBinding true
+        dataBinding true
+    }
+
+    task jacocoTestReport(type: JacocoReport, dependsOn: ['testDebugUnitTest', 'createDebugCoverageReport']) {
+
+        reports {
+            xml.enabled = true
+            html.enabled = true
+            html.outputLocation = layout.buildDirectory.dir('jacocoHtml')
+
+        }
+        tasks.withType(Test) {
+            jacoco.includeNoLocationClasses = true
+            jacoco.excludes = ['jdk.internal.*']
+        }
+
+        def fileFilter = ['*/R.class', '/R$.class', '*/BuildConfig.', '*/Manifest.', '/*Test.', 'android//.*']
+        def debugTree = fileTree(dir: "${buildDir}/intermediates/classes/debug", excludes: fileFilter)
+        def mainSrc = "${project.projectDir}/src/main/java"
+
+        sourceDirectories.setFrom(files([mainSrc]))
+        classDirectories.setFrom(files([debugTree]))
+        executionData.setFrom(fileTree(dir: "$buildDir", includes: [
+                "jacoco/testDebugUnitTest.exec",
+                "outputs/code-coverage/connected/*coverage.ec"
+        ]))
+    }
+
+    testOptions {
+        unitTests.all {
+            jacoco {
+                includeNoLocationClasses = true
+            }
+        }
+        unitTests.returnDefaultValues = true
+    }
+
+}
+
+configurations.all{
+    resolutionStrategy {
+        eachDependency { details ->
+            if ('org.jacoco' == details.requested.group) {
+                details.useVersion "0.8.7"
+            }
+        }
+    }
+}
+
+dependencies {
+    implementation "androidx.core:core-ktx:$core_ktx"
+    implementation "androidx.appcompat:appcompat:$app_compat"
+    implementation "com.google.android.material:material:$material"
+    implementation "androidx.constraintlayout:constraintlayout:$constraint_layout"
+    implementation "com.squareup.retrofit2:converter-gson:$gson_converter"
+    implementation "androidx.test.ext:junit-ktx:$junit_ktx"
+    testImplementation "junit:junit:$junit"
+    testImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:$coroutines_test"
+    androidTestImplementation "androidx.test.ext:junit:$ext_junit"
+    androidTestImplementation "androidx.test.espresso:espresso-core:$espresso_core"
+    implementation "androidx.fragment:fragment-ktx:$fragment_ktx"
+    implementation "com.squareup.okhttp3:logging-interceptor:$okhttp3"
+    implementation "androidx.paging:paging-runtime-ktx:$paging"
+    implementation "com.google.dagger:hilt-android:$hilt_compiler"
+    kapt "com.google.dagger:hilt-android-compiler:$hilt_compiler"
+    implementation "com.squareup.picasso:picasso:$picasso"
+    testImplementation "org.mockito:mockito-core:$mockito_core"
+    testImplementation "org.jetbrains.kotlin:kotlin-test-junit:$test_junit"
+    testImplementation "org.mockito:mockito-inline:$mockito_inline"
+    testImplementation "androidx.arch.core:core-testing:$arch_testing"
+
+
+
+
+
+
+
+}
+kapt {
+    correctErrorTypes = true
+}

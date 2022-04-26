@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">scalio</string>
+    <string name="error_message">Something went wrong!</string>
+    <string name="empty_list_message">No results found!</string>
+    <string name="user_avatar_desc">User avatar</string>
+    <string name="search_hint">Enter username</string>
+</resources>

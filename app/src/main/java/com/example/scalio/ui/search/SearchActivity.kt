@@ -5,10 +5,11 @@ import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.isVisible
-import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
+import androidx.paging.CombinedLoadStates
 import androidx.paging.LoadState
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.scalio.R
 import com.example.scalio.databinding.ActivitySearchBinding
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.collectLatest
@@ -42,35 +43,41 @@ class SearchActivity : AppCompatActivity() {
 
     private fun setupObservers() {
         lifecycleScope.launch {
-            viewModel.users.observe(this@SearchActivity, Observer {
+            viewModel.users.observe(this@SearchActivity) {
                 adapter.submitData(lifecycle, it)
-            })
+            }
         }
 
         lifecycleScope.launch {
             adapter.loadStateFlow.distinctUntilChanged().collectLatest {
                 if (it.refresh is LoadState.NotLoading) {
-                    val isListEmpty = it.refresh is LoadState.NotLoading && adapter.itemCount == 0
-                    binding.usersListView.isVisible = !isListEmpty
-                    binding.errorMessage.isVisible =
-                        isListEmpty && binding.loginField.text.isNotEmpty()
-
-                    val errorState = it.source.append as? LoadState.Error
-                        ?: it.source.prepend as? LoadState.Error
-                        ?: it.append as? LoadState.Error
-                        ?: it.prepend as? LoadState.Error
-                    errorState?.let {
-                        Toast.makeText(
-                            this@SearchActivity,
-                            " Aa-oh ${it.error}",
-                            Toast.LENGTH_LONG
-                        ).show()
-                    }
+                    setViewVisibility()
                 }
+                setErrorHandling(it)
             }
         }
 
+    }
 
+    private fun setErrorHandling(loadState: CombinedLoadStates) {
+        val errorState = loadState.source.append as? LoadState.Error
+            ?: loadState.source.prepend as? LoadState.Error
+            ?: loadState.append as? LoadState.Error
+            ?: loadState.prepend as? LoadState.Error
+            ?: loadState.refresh as? LoadState.Error
+        errorState?.let {
+            Toast.makeText(
+                this@SearchActivity, getString(R.string.paging_error, it.error),
+                Toast.LENGTH_LONG
+            ).show()
+        }
+    }
+
+    private fun setViewVisibility() {
+        val isListEmpty = adapter.itemCount == 0
+        binding.usersListView.isVisible = !isListEmpty
+        binding.errorMessage.isVisible =
+            isListEmpty && binding.loginField.text.isNotEmpty()
     }
 }
 

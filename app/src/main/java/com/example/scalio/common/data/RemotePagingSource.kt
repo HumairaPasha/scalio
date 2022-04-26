@@ -4,6 +4,8 @@ import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import com.example.scalio.api.UserService
 import com.example.scalio.common.data.model.User
+import retrofit2.HttpException
+import java.io.IOException
 
 class RemotePagingSource(
     private val query: String,

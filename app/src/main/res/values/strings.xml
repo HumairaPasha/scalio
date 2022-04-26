@@ -4,4 +4,6 @@
     <string name="empty_list_message">No results found!</string>
     <string name="user_avatar_desc">User avatar</string>
     <string name="search_hint">Enter username</string>
+    <string name="submit">Submit</string>
+    <string name="paging_error">Aa-oh %s</string>
 </resources>
